@@ -92,10 +92,11 @@ def split_attacks(seed):
     return sorted(atts[:k]), sorted(atts[k:])
 
 
-def diversity_split(train_atts, test_atts, seed):
+def diversity_split(train_atts, test_atts, seed, n_per_attack=N_EXTRA_PER_ATTACK):
     """Speaker-disjoint split of the eval protocol.
     Returns (extra_rows, test_rows): extra = spoofs of train_atts + matching bonafide,
-    test = bonafide + spoofs of test_atts, all from the other half of the speakers."""
+    test = bonafide + spoofs of test_atts, all from the other half of the speakers.
+    n_per_attack = extra spoof clips per attack in train_atts (bonafide count matches the spoofs)."""
     rows = read_protocol("eval")
     spk = {}
     for line in PROTO["eval"].read_text().splitlines():
@@ -111,9 +112,9 @@ def diversity_split(train_atts, test_atts, seed):
     extra = []
     for a in train_atts:
         pool = [r for r in rows_x if r[1] == a]
-        extra += rx.sample(pool, min(N_EXTRA_PER_ATTACK, len(pool)))
+        extra += rx.sample(pool, min(n_per_attack, len(pool)))
     pool = [r for r in rows_x if r[2] == 1]
-    extra += rx.sample(pool, min(N_EXTRA_PER_ATTACK * len(train_atts), len(pool)))
+    extra += rx.sample(pool, min(n_per_attack * len(train_atts), len(pool)))
 
     rt = random.Random(f"{seed}-test")
     pool = [r for r in rows_t if r[2] == 1]
