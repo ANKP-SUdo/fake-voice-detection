@@ -1,31 +1,24 @@
-import argparse
+"""Train the SVM baseline and evaluate it. Run from the project root:  python run.py"""
 from pathlib import Path
 
 import joblib
-import numpy as np
 
 from core import (eer, load, make_model, min_tdcf,
                   sample_dev, sample_eval, sample_train)
 
 
 def main():
-    ap = argparse.ArgumentParser(
-        description="Train the SVM baseline and evaluate it.")
-    ap.add_argument("--trim", action="store_true",
-                    help="trim leading/trailing silence first")
-    args = ap.parse_args()
-    tag = "trim" if args.trim else "raw"
-    print(f"=== SVM baseline ({tag}) ===")
+    print("=== SVM baseline ===")
 
-    X_tr, y_tr, _ = load(sample_train(), "train", args.trim)
-    X_dev, y_dev, _ = load(sample_dev(), "dev", args.trim)
-    X_ev, y_ev, att_ev = load(sample_eval(), "eval", args.trim)
+    X_tr, y_tr, _ = load(sample_train(), "train")
+    X_dev, y_dev, _ = load(sample_dev(), "dev")
+    X_ev, y_ev, att_ev = load(sample_eval(), "eval")
     print(f"train: {len(y_tr)} clips | dev: {len(y_dev)} | eval: {len(y_ev)}")
 
     model = make_model()
     model.fit(X_tr, y_tr)
     Path("models").mkdir(exist_ok=True)
-    joblib.dump(model, f"models/svm_{tag}.joblib")
+    joblib.dump(model, "models/svm_baseline.joblib")
 
     s_dev = model.decision_function(X_dev)   # higher = more likely bonafide
     s_ev = model.decision_function(X_ev)

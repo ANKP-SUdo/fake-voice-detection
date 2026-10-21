@@ -126,16 +126,8 @@ def diversity_split(train_atts, test_atts, seed, n_per_attack=N_EXTRA_PER_ATTACK
 
 
 # ---------------------------------------------------------------- features
-def extract(path, trim=False):
-    if trim:
-        y, _ = librosa.load(path, sr=SR)
-        # then keep the first 4 s of what is left
-        y, _ = librosa.effects.trim(y, top_db=30)
-        y = y[: SR * MAX_SEC]
-        y = np.pad(y, (0, max(0, 2048 - len(y))))
-    else:
-        # first 4 s of the raw file
-        y, _ = librosa.load(path, sr=SR, duration=MAX_SEC)
+def extract(path):
+    y, _ = librosa.load(path, sr=SR, duration=MAX_SEC)
     parts = [
         librosa.feature.mfcc(y=y, sr=SR, n_mfcc=20),
         librosa.feature.spectral_centroid(y=y, sr=SR),
@@ -147,22 +139,21 @@ def extract(path, trim=False):
     return np.concatenate([np.concatenate([p.mean(axis=1), p.std(axis=1)]) for p in parts])
 
 
-def features(paths, trim=False):
+def features(paths):
     """One cached .npy per utterance, so any new selection of clips reuses what exists."""
-    d = CACHE / f"{FEATURE_VERSION}_{'trim' if trim else 'raw'}"
+    d = CACHE / FEATURE_VERSION
     d.mkdir(parents=True, exist_ok=True)
     todo = [p for p in paths if not (d / f"{Path(p).stem}.npy").exists()]
     if todo:
-        print(
-            f"  extracting {len(todo)} files ({'trim' if trim else 'raw'}) ...")
-        out = Parallel(n_jobs=-1)(delayed(extract)(p, trim) for p in todo)
+        print(f"  extracting {len(todo)} files ...")
+        out = Parallel(n_jobs=-1)(delayed(extract)(p) for p in todo)
         for p, x in zip(todo, out):
             np.save(d / f"{Path(p).stem}.npy", x)
     return np.array([np.load(d / f"{Path(p).stem}.npy") for p in paths])
 
 
-def load(rows, split, trim=False):
-    X = features([audio_path(split, r[0]) for r in rows], trim)
+def load(rows, split):
+    X = features([audio_path(split, r[0]) for r in rows])
     y = np.array([r[2] for r in rows])
     attacks = np.array([r[1] for r in rows])
     return X, y, attacks

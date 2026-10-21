@@ -21,13 +21,12 @@ def eers(model, X, y, att):
 def main():
     ap = argparse.ArgumentParser(description="Does training on more attack types help on other unseen attacks?")
     ap.add_argument("--seed", type=int, default=0, help="seed for the random attack and speaker split")
-    ap.add_argument("--trim", action="store_true", help="trim silence first")
     args = ap.parse_args()
 
     g1, g2 = split_attacks(args.seed)
     print(f"seed {args.seed} | group 1: {g1} | group 2: {g2}")
 
-    X_base, y_base, _ = load(sample_train(), "train", args.trim)
+    X_base, y_base, _ = load(sample_train(), "train")
     base = make_model().fit(X_base, y_base)
 
     for train_atts, test_atts in [(g1, g2), (g2, g1)]:
@@ -38,9 +37,9 @@ def main():
                                           n_per_attack=n_spoof // len(CONTROL))
         assert ctrl_test == test, "control must use the identical test clips"
 
-        X_ex, y_ex, _ = load(extra, "eval", args.trim)
-        X_ct, y_ct, _ = load(ctrl, "eval", args.trim)
-        X_te, y_te, att_te = load(test, "eval", args.trim)
+        X_ex, y_ex, _ = load(extra, "eval")
+        X_ct, y_ct, _ = load(ctrl, "eval")
+        X_te, y_te, att_te = load(test, "eval")
         plus = make_model().fit(np.vstack([X_base, X_ex]), np.r_[y_base, y_ex])
         ctrl_model = make_model().fit(np.vstack([X_base, X_ct]), np.r_[y_base, y_ct])
 
