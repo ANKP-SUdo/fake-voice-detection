@@ -18,6 +18,10 @@ N_DEV_PER_CLASS = 2000
 N_EVAL_BONAFIDE = 2000
 N_PER_ATTACK = 300
 
+# attack-diversity experiment (analysis/attack_diversity.py)
+N_EXTRA_PER_ATTACK = 430          # about the per-attack count of A01-A06 in the base training set
+SEEN_BEFORE = {"A16", "A19"}      # same systems as training attacks A04 / A06, so not "unseen"
+
 LA = Path("dataset/raw/LA")
 CM = LA / "ASVspoof2019_LA_cm_protocols"
 PROTO = {
@@ -78,6 +82,46 @@ def sample_eval():
         pool = [r for r in rows if r[1] == a]
         out += random.sample(pool, min(N_PER_ATTACK, len(pool)))
     return out
+
+
+def split_attacks(seed):
+    """Randomly split the unseen attacks into two groups."""
+    atts = sorted({r[1] for r in read_protocol("eval") if r[2] == 0} - SEEN_BEFORE)
+    random.Random(seed).shuffle(atts)
+    k = len(atts) // 2
+    return sorted(atts[:k]), sorted(atts[k:])
+
+
+def diversity_split(train_atts, test_atts, seed):
+    """Speaker-disjoint split of the eval protocol.
+    Returns (extra_rows, test_rows): extra = spoofs of train_atts + matching bonafide,
+    test = bonafide + spoofs of test_atts, all from the other half of the speakers."""
+    rows = read_protocol("eval")
+    spk = {}
+    for line in PROTO["eval"].read_text().splitlines():
+        s, utt = line.split()[:2]
+        spk[utt] = s
+    ids = sorted(set(spk.values()))
+    random.Random(f"{seed}-spk").shuffle(ids)
+    extra_spk = set(ids[: len(ids) // 2])
+    rows_x = [r for r in rows if spk[r[0]] in extra_spk]
+    rows_t = [r for r in rows if spk[r[0]] not in extra_spk]
+
+    rx = random.Random(f"{seed}-extra")
+    extra = []
+    for a in train_atts:
+        pool = [r for r in rows_x if r[1] == a]
+        extra += rx.sample(pool, min(N_EXTRA_PER_ATTACK, len(pool)))
+    pool = [r for r in rows_x if r[2] == 1]
+    extra += rx.sample(pool, min(N_EXTRA_PER_ATTACK * len(train_atts), len(pool)))
+
+    rt = random.Random(f"{seed}-test")
+    pool = [r for r in rows_t if r[2] == 1]
+    test = rt.sample(pool, min(N_EVAL_BONAFIDE, len(pool)))
+    for a in test_atts:
+        pool = [r for r in rows_t if r[1] == a]
+        test += rt.sample(pool, min(N_PER_ATTACK, len(pool)))
+    return extra, test
 
 
 # ---------------------------------------------------------------- features
