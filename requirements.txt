@@ -1,10 +1,15 @@
-torch
-torchaudio
-librosa
-soundfile
-numpy
-scipy
-scikit-learn
-matplotlib
-streamlit
-plotly
+# Baseline + demo
+librosa==1.0.0
+soundfile==0.14.0
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+matplotlib==3.11.2
+streamlit==1.64.0
+plotly==7.1.0
+
+# Planned for the RawNet2 step (not used by the baseline or demo).
+# Only analysis/check_mel.py needs these; uncomment to run it.
+# torch==2.14.0
+# torchaudio==2.11.0
