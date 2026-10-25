@@ -30,3 +30,15 @@ Pooled EER on held-out attacks:
 
 New attack types helped in 6/6 tables (about -2.9 points on average); the control did not.
 A17 (VC) stays hard (28.6-35.6% EER even with extra attack types).
+
+## Demo
+
+Run locally: `streamlit run app.py`
+
+| Real speech | Seen attack (A19) | Unseen attack (A17) |
+|---|---|---|
+| ![real](docs/demo_real.jpeg) | ![a19](docs/demo_a19.jpeg) | ![a17](docs/demo_a17.jpeg) |
+| score 1.221, REAL | score -0.350, FAKE | score 0.564, REAL (missed) |
+
+The A17 miss illustrates the generalization gap seen in the eval metrics (EER 11.54%).
+Next step: RawNet2 on raw waveforms.
