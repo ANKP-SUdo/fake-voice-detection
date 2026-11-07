@@ -40,5 +40,25 @@ Run locally: `streamlit run app.py`
 | ![real](docs/demo_real.jpeg) | ![a19](docs/demo_a19.jpeg) | ![a17](docs/demo_a17.jpeg) |
 | score 1.221, REAL | score -0.350, FAKE | score 0.564, REAL (missed) |
 
-The A17 miss illustrates the generalization gap seen in the eval metrics (EER 11.54%).
-Next step: RawNet2 on raw waveforms.
+The demo above runs the SVM baseline. Its A17 miss illustrates the generalization gap seen in the SVM's eval metrics (EER 11.54%).
+
+## Results (ASVspoof 2019 LA eval, 71,237 trials)
+
+| Model | EER | min t-DCF |
+|---|---|---|
+| SVM + hand-crafted features | 11.54% | 0.27 |
+| RawNet2 (raw waveform, 25 epochs) | 6.66% | 0.162 |
+
+RawNet2 per-attack EER: 10 of 13 attacks between 0.5% and 2.8%, A08 6.9%, and the hardest are A17 (10.3%) and A18 (27.6%).
+
+Caveats:
+- The SVM used a smaller training subset, so the gain combines model and data effects.
+- Single run, seed 0; checkpoint chosen by dev EER (best dev EER 0.70% at epoch 17).
+- Eval clips are cut to their first 64,600 samples (about 4 s).
+
+Reproduce the RawNet2 metrics from the saved scores: `python -m analysis.eval_rawnet2`
+(reads `analysis/eval_scores_rawnet2.csv`). The trained checkpoint is not in the repo yet.
+
+## Next
+- Add RawNet2 as a second model in the demo.
+- Future work: AASIST and self-supervised front-ends, data augmentation, and a second seed.
