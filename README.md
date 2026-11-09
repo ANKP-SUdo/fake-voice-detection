@@ -45,7 +45,7 @@ and run `pip install torch`. Without them the app runs the SVM only.
 | Attack A19 (same algorithm as a training attack) | -0.350, FAKE | -6.095, FAKE |
 | Attack A17 (unseen attack) | 0.564, REAL (missed) | -9.823, FAKE |
 
-![real](docs/demo_both_real.png) ![a19](docs/demo_both_a19.png) ![a17](docs/demo_both_a17.png)
+![real](docs/demo_both_real.jpeg) ![a19](docs/demo_both_a19.jpeg) ![a17](docs/demo_both_a17.jpeg)
 
 Three clips are illustrations, not evidence. The eval-set metrics are in the results table below,
 and RawNet2 still misses some A17 clips (A17 EER 10.3%).
