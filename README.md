@@ -33,14 +33,22 @@ A17 (VC) stays hard (28.6-35.6% EER even with extra attack types).
 
 ## Demo
 
-Run locally: `streamlit run app.py`
+Run locally: `streamlit run app.py`. The sidebar offers the SVM baseline, RawNet2, or both side by side.
 
-| Real speech | Seen attack (A19) | Unseen attack (A17) |
+RawNet2 needs PyTorch and the checkpoint: download `rawnet2_best.pt` from the
+[latest Release](https://github.com/ANKP-SUdo/fake-voice-detection/releases) into `models/`
+and run `pip install torch`. Without them the app runs the SVM only.
+
+| Eval clip | SVM | RawNet2 |
 |---|---|---|
-| ![real](docs/demo_real.jpeg) | ![a19](docs/demo_a19.jpeg) | ![a17](docs/demo_a17.jpeg) |
-| score 1.221, REAL | score -0.350, FAKE | score 0.564, REAL (missed) |
+| Real speech | 1.221, REAL | 9.332, REAL |
+| Attack A19 (same algorithm as a training attack) | -0.350, FAKE | -6.095, FAKE |
+| Attack A17 (unseen attack) | 0.564, REAL (missed) | -9.823, FAKE |
 
-The demo above runs the SVM baseline. Its A17 miss illustrates the generalization gap seen in the SVM's eval metrics (EER 11.54%).
+![real](docs/demo_both_real.png) ![a19](docs/demo_both_a19.png) ![a17](docs/demo_both_a17.png)
+
+Three clips are illustrations, not evidence. The eval-set metrics are in the results table below,
+and RawNet2 still misses some A17 clips (A17 EER 10.3%).
 
 ## Results (ASVspoof 2019 LA eval, 71,237 trials)
 
