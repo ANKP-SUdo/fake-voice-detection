@@ -50,22 +50,43 @@ and run `pip install torch`. Without them the app runs the SVM only.
 Three clips are illustrations, not evidence. The eval-set metrics are in the results table below,
 and RawNet2 still misses some A17 clips (A17 EER 10.3%).
 
-## Results (ASVspoof 2019 LA eval, 71,237 trials)
+## Results (ASVspoof 2019 LA eval)
 
-| Model | EER | min t-DCF |
-|---|---|---|
-| SVM + hand-crafted features | 11.54% | 0.27 |
-| RawNet2 (raw waveform, 25 epochs) | 6.66% | 0.162 |
+The SVM was scored on a seeded, stratified sample of the eval set (5,900 clips: 2,000 bonafide + 300 per attack) and trained on 5,160 clips.
+RawNet2 was trained on all 25,380 training clips and scored on all 71,237 eval trials. `analysis/compare_models.py` also scores RawNet2 on the SVM's exact sample.
 
-RawNet2 per-attack EER: 10 of 13 attacks between 0.5% and 2.8%, A08 6.9%, and the hardest are A17 (10.3%) and A18 (27.6%).
+| Model | Eval set | EER | min t-DCF |
+|---|---|---|---|
+| SVM + hand-crafted features | 5,900-clip sample | 11.54% | 0.270 |
+| RawNet2 | same 5,900-clip sample | 6.35% | 0.159 |
+| RawNet2 | full 71,237 trials | 6.66% | 0.162 |
+
+Per-attack EER (%), same 5,900-clip sample; RawNet2 on the full eval in the last column:
+
+| Attack | SVM | RawNet2 | RawNet2 (full) |
+|---|---|---|---|
+| A07 | 0.00 | 2.32 | 2.46 |
+| A08 | 0.66 | 5.63 | 6.90 |
+| A09 | 1.00 | 0.68 | 0.55 |
+| A10 | 3.63 | 2.32 | 2.63 |
+| A11 | 2.58 | 2.32 | 2.21 |
+| A12 | 16.63 | 2.63 | 2.79 |
+| A13 | 2.71 | 0.97 | 0.70 |
+| A14 | 3.02 | 1.07 | 1.07 |
+| A15 | 11.05 | 2.71 | 2.32 |
+| A16 | 0.61 | 1.71 | 1.52 |
+| A17 | 35.34 | 8.24 | 10.28 |
+| A18 | 20.68 | 28.49 | 27.63 |
+| A19 | 1.12 | 2.05 | 2.57 |
+
+Observations: RawNet2 fixes the attacks the SVM fails most (A12, A15, A17), but is worse than the SVM on A18,
+which is the weakest result for both models; the cause is not yet investigated. Each attack has only 300 spoof clips in the
+sample, so differences of a point or two per attack are within noise.
 
 Caveats:
-- The SVM used a smaller training subset, so the gain combines model and data effects.
-- Single run, seed 0; checkpoint chosen by dev EER (best dev EER 0.70% at epoch 17).
-- Eval clips are cut to their first 64,600 samples (about 4 s).
-
-Reproduce the RawNet2 metrics from the saved scores: `python -m analysis.eval_rawnet2`
-(reads `analysis/eval_scores_rawnet2.csv`). The trained checkpoint is not in the repo yet.
+- Model class and training-set size are confounded (the SVM used a smaller training subset).
+- Single run, seed 0; the RawNet2 checkpoint was chosen by dev EER (best dev EER 0.70% at epoch 17).
+- RawNet2 scores only the first 64,600 samples (about 4 s) of each clip.
 
 ## Next
 - Add RawNet2 as a second model in the demo.
