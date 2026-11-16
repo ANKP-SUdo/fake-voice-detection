@@ -1,4 +1,6 @@
-# Baseline + demo
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Baseline + demo + RawNet2 inference (CPU)
 librosa==1.0.0
 soundfile==0.14.0
 numpy==2.5.3
@@ -8,8 +10,4 @@ joblib==1.6.0
 matplotlib==3.11.2
 streamlit==1.64.0
 plotly==7.1.0
-
-# Planned for the RawNet2 step (not used by the baseline or demo).
-# Only analysis/check_mel.py needs these; uncomment to run it.
-# torch==2.14.0
-# torchaudio==2.11.0
+torch==2.14.0
